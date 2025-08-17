@@ -67,7 +67,7 @@ export class GarageDoorAccessory {
     this.platform.log.debug('Set Target Door State ->', targetState);
 
     // Only trigger if the door is not already in the target state
-    if (targetState === 0 && currentState !== 0) { // Open
+    if (targetState === 0 && currentState != 0) { // Open
       await this.triggerGarageDoor();
       this.doorStates.CurrentDoorState = 2; // Opening
       this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, 2);
@@ -76,52 +76,16 @@ export class GarageDoorAccessory {
       setTimeout(() => {
         this.doorStates.CurrentDoorState = 0; // Open
         this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, 0);
-      }, 15000); // 15 seconds to open
-
-      // Simulate door closing after 30 seconds
-      setTimeout(() => {
-        this.doorStates.CurrentDoorState = 3; // Closing
-        this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, 3);
-
-        setTimeout(() => {
-          this.doorStates.CurrentDoorState = 1; // Closed
-          this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, 1);
-        }, 15000); // 15 seconds to close
-      }, 45000); // 30 seconds open + 15 seconds opening
-
-    } else if (targetState === 1 && currentState !== 1) { // Close
-      // For closing, we trigger the same sequence but show appropriate states
-      await this.triggerGarageDoor();
-
-      if (currentState === 0) { // If door is currently open
-        this.doorStates.CurrentDoorState = 3; // Closing
-        this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, 3);
-
-        setTimeout(() => {
-          this.doorStates.CurrentDoorState = 1; // Closed
-          this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, 1);
-        }, 15000); // 15 seconds to close
-      } else { // If door is in any other state, it will go through the full cycle
-        this.doorStates.CurrentDoorState = 2; // Opening
-        this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, 2);
-
-        // Simulate door opening sequence
-        setTimeout(() => {
-          this.doorStates.CurrentDoorState = 0; // Open
-          this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, 0);
-        }, 15000); // 15 seconds to open
-
-        // Simulate door closing after 30 seconds
         setTimeout(() => {
           this.doorStates.CurrentDoorState = 3; // Closing
           this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, 3);
-
+          this.service.updateCharacteristic(this.platform.Characteristic.TargetDoorState, 1);
           setTimeout(() => {
             this.doorStates.CurrentDoorState = 1; // Closed
             this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, 1);
           }, 15000); // 15 seconds to close
-        }, 45000); // 30 seconds open + 15 seconds opening
-      }
+        }, 30000); // 30 seconds to open
+      }, 15000); // 15 seconds to open
     }
   }
 

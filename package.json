@@ -2,17 +2,17 @@
   "name": "homebridge-garage-opener",
   "displayName": "Garage Opener",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Homebridge plugin for controlling garage door via HTTP API",
-  "author": "Your Name",
+  "author": "jodok",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/USERNAME/homebridge-garage-opener#readme",
+  "homepage": "https://github.com/jodok/homebridge-garage-opener#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/USERNAME/homebridge-garage-opener.git"
+    "url": "git+https://github.com/jodok/homebridge-garage-opener.git"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/homebridge-garage-opener/issues"
+    "url": "https://github.com/jodok/homebridge-garage-opener/issues"
   },
   "keywords": [
     "homebridge-plugin",

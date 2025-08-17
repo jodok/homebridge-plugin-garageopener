@@ -22,6 +22,7 @@ export class GarageDoorAccessory {
   };
 
   constructor(
+    // eslint-disable-next-line no-unused-vars
     private readonly platform: GarageOpenerPlatform,
     private readonly accessory: PlatformAccessory,
   ) {
@@ -166,7 +167,7 @@ export class GarageDoorAccessory {
 
     // Request body as specified in the API documentation
     const requestBody = JSON.stringify({
-      gpio_pin: device.gpioPin || 23
+      gpio_pin: device.gpioPin || 23,
     });
 
     // Generate HMAC-SHA256 authentication hash
@@ -180,7 +181,7 @@ export class GarageDoorAccessory {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authHash}`,
-          'Content-Length': Buffer.byteLength(requestBody)
+          'Content-Length': Buffer.byteLength(requestBody),
         },
         timeout: 5000,
       }, (res: http.IncomingMessage) => {

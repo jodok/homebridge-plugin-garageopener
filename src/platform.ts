@@ -18,6 +18,7 @@ export class GarageOpenerPlatform implements DynamicPlatformPlugin {
 
   constructor(
     public readonly log: Logging,
+    // eslint-disable-next-line no-unused-vars
     public readonly config: PlatformConfig,
     public readonly api: API,
   ) {

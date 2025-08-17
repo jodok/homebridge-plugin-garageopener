@@ -1,35 +1,28 @@
-import eslint from '@eslint/js';
+import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**'],
+    ignores: ['dist/**', 'node_modules/**', 'test_auth.js'],
   },
-  {
-    rules: {
-      'quotes': ['error', 'single'],
-      'indent': ['error', 2, { 'SwitchCase': 0 }],
-      'linebreak-style': ['error', 'unix'],
-      'semi': ['error', 'always'],
-      'comma-dangle': ['error', 'always-multiline'],
-      'dot-notation': 'error',
-      'eqeqeq': ['error', 'smart'],
-      'curly': ['error', 'all'],
-      'brace-style': ['error'],
-      'prefer-arrow-callback': 'warn',
-      'max-len': ['warn', 160],
-      'object-curly-spacing': ['error', 'always'],
-      'no-use-before-define': 'off',
-      '@typescript-eslint/no-use-before-define': ['error', { 'classes': false, 'enums': false }],
-      '@typescript-eslint/no-unused-vars': ['error', { 'caughtErrors': 'none' }],
-    },
-  },
-  {
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'module',
-    },
-  },
-  eslint.configs.recommended,
+  js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './tsconfig.json',
+      },
+      globals: {
+        setTimeout: 'readonly',
+        Buffer: 'readonly',
+      },
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...tseslint.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_' }],
+    },
+  },
 );

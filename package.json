@@ -2,7 +2,7 @@
   "name": "homebridge-garage-opener",
   "displayName": "Garage Opener",
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Homebridge plugin for controlling garage door via HTTP API",
   "author": "jodok",
   "license": "Apache-2.0",

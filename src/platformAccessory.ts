@@ -16,8 +16,8 @@ export class GarageDoorAccessory {
    * Garage door states
    */
   private doorStates = {
-    CurrentDoorState: 0, // 0=Open, 1=Closed, 2=Opening, 3=Closing, 4=Stopped
-    TargetDoorState: 0,  // 0=Open, 1=Closed
+    CurrentDoorState: 1, // 0=Open, 1=Closed, 2=Opening, 3=Closing, 4=Stopped
+    TargetDoorState: 1,  // 0=Open, 1=Closed
     ObstructionDetected: false,
   };
 

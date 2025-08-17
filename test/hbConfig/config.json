@@ -1,13 +1,13 @@
 {
   "bridge": {
-    "name": "PluginTemplate",
+    "name": "GarageOpener",
     "username": "AA:BB:CC:DD:EE:FF",
     "port": 51826,
     "pin": "031-45-154"
   },
-  "description": "HomeBridge HTTP Status Control",
+  "description": "HomeBridge Garage Door Opener",
   "plugins": [
-    "homebridge-plugin-name",
+    "homebridge-garage-opener",
     "homebridge-config-ui-x"
   ],
   "platforms": [
@@ -23,8 +23,12 @@
       "debug": false
     },
     {
-      "name": "homebridge-plugin-name",
-      "platform": "ExampleHomebridgePlugin"
+      "name": "Garage Door",
+      "platform": "GarageOpener",
+      "ipAddress": "192.168.1.251",
+      "port": 8080,
+      "secret": "your_relay_secret_here",
+      "gpioPin": 23
     }
   ],
   "accessories": []

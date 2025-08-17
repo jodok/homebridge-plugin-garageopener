@@ -6,79 +6,147 @@
 
 <span align="center">
 
-# Homebridge Platform Plugin Template
+# Homebridge Garage Door Opener
 
 </span>
 
 > [!IMPORTANT]
 > **Homebridge v2.0 Information**
 >
-> This template currently has a
-> - `package.json -> engines.homebridge` value of `"^1.8.0 || ^2.0.0-beta.0"`
-> - `package.json -> devDependencies.homebridge` value of `"^2.0.0-beta.0"`
->
-> This is to ensure that your plugin will build and run on both Homebridge v1 and v2.
->
-> Once Homebridge v2.0 has been released, you can remove the `-beta.0` in both places.
+> This plugin supports both Homebridge v1 and v2.
 
 ---
 
-This is a template Homebridge dynamic platform plugin and can be used as a base to help you get started developing your own plugin.
+A Homebridge plugin that exposes your garage door as a HomeKit accessory. This plugin integrates with the [Raspberry Pi Relay Module](https://github.com/jodok/raspberry-pi-relay-module) to control your garage door through the Home app, Siri, and HomeKit automations.
 
-This template should be used in conjunction with the [developer documentation](https://developers.homebridge.io/). A full list of all supported service types, and their characteristics is available on this site.
+## Features
 
-### Clone As Template
+- Control your garage door via HomeKit
+- Automatic door state simulation based on your garage door's timing
+- HTTP API integration with Raspberry Pi relay module
+- HMAC-SHA256 authentication for secure communication
+- Support for custom IP address, port, and GPIO pin configuration
 
-Click the link below to create a new GitHub Repository using this template, or click the *Use This Template* button above.
+## How It Works
 
-<span align="center">
+This plugin sends an HTTP POST request to your Raspberry Pi relay module at `http://[IP_ADDRESS]:[PORT]/relay/trigger` to trigger the garage door. The request includes:
 
-### [Create New Repository From Template](https://github.com/homebridge/homebridge-plugin-template/generate)
+- **Authentication**: HMAC-SHA256 hash using your relay secret
+- **Request Body**: `{"gpio_pin": 23}` (or your configured GPIO pin)
+- **Headers**: `Content-Type: application/json` and `Authorization: Bearer <hash>`
 
-</span>
+The plugin then simulates the door's behavior:
+
+1. **Opening**: 15 seconds to open
+2. **Open**: Stays open for 30 seconds
+3. **Closing**: 15 seconds to close
+
+## Prerequisites
+
+- [Raspberry Pi Relay Module](https://github.com/jodok/raspberry-pi-relay-module) installed and running
+- The relay module's `RELAY_SECRET` from your `.env` file
+- Homebridge v1.8.0+ or v2.0.0+
+
+## Configuration
+
+Add the following to your Homebridge `config.json`:
+
+```json
+{
+  "platforms": [
+    {
+      "platform": "GarageOpener",
+      "name": "Garage Door",
+      "ipAddress": "192.168.1.251",
+      "port": 8080,
+      "secret": "your_relay_secret_here",
+      "gpioPin": 23
+    }
+  ]
+}
+```
+
+### Configuration Options
+
+- **name** (required): The name of your garage door as it will appear in HomeKit
+- **ipAddress** (required): The IP address of your Raspberry Pi relay module (default: 192.168.1.251)
+- **port** (required): The port number of your Raspberry Pi relay module (default: 8080)
+- **secret** (required): The HMAC-SHA256 secret key from your relay module's `.env` file
+- **gpioPin** (optional): The GPIO pin number connected to the relay module (default: 23)
+
+### Getting Your Relay Secret
+
+The `secret` field must match the `RELAY_SECRET` value in your Raspberry Pi relay module's `.env` file. To find this value:
+
+1. SSH into your Raspberry Pi
+2. Navigate to your relay module directory
+3. Check the `.env` file:
+
+   ```bash
+   cat .env | grep RELAY_SECRET
+   ```
+
+If you need to regenerate the secret, you can use:
+
+```bash
+openssl rand -hex 32
+```
+
+## Installation
+
+1. Install the plugin:
+
+   ```bash
+   sudo npm install -g homebridge-garage-opener
+   ```
+
+2. Add the platform configuration to your Homebridge config.json
+
+3. Restart Homebridge
+
+4. The garage door will appear in your Home app
+
+## Testing Your Configuration
+
+Before setting up Homebridge, you can test your Raspberry Pi relay module connection using the included test script:
+
+```bash
+# Test the connection and authentication
+node test_auth.js your_secret_here 192.168.1.251 8080 23
+```
+
+This script will:
+
+1. Test the health check endpoint (no authentication required)
+2. Test the relay trigger endpoint with HMAC-SHA256 authentication
+3. Show you the exact request being sent and response received
+
+If both tests pass, your configuration is correct and ready for Homebridge.
+
+## API Integration
+
+This plugin integrates with the Raspberry Pi Relay Module API:
+
+- **Endpoint**: `POST /relay/trigger`
+- **Authentication**: HMAC-SHA256 with Bearer token
+- **Request Body**: `{"gpio_pin": 23}` (or your configured pin)
+- **Response**: JSON with status and timestamp
+
+For more details, see the [Raspberry Pi Relay Module documentation](https://github.com/jodok/raspberry-pi-relay-module).
+
+## Development
 
 ### Setup Development Environment
 
-To develop Homebridge plugins you must have Node.js 18 or later installed, and a modern code editor such as [VS Code](https://code.visualstudio.com/). This plugin template uses [TypeScript](https://www.typescriptlang.org/) to make development easier and comes with pre-configured settings for [VS Code](https://code.visualstudio.com/) and ESLint. If you are using VS Code install these extensions:
-
-- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+To develop this plugin you must have Node.js 18 or later installed, and a modern code editor such as [VS Code](https://code.visualstudio.com/).
 
 ### Install Development Dependencies
-
-Using a terminal, navigate to the project folder and run this command to install the development dependencies:
 
 ```shell
 npm install
 ```
 
-### Update package.json
-
-Open the [`package.json`](./package.json) and change the following attributes:
-
-- `name` - this should be prefixed with `homebridge-` or `@username/homebridge-`, is case-sensitive, and contains no spaces nor special characters apart from a dash `-`
-- `displayName` - this is the "nice" name displayed in the Homebridge UI
-- `homepage` - link to your GitHub repo's `README.md`
-- `repository.url` - link to your GitHub repo
-- `bugs.url` - link to your GitHub repo issues page
-
-When you are ready to publish the plugin you should set `private` to false, or remove the attribute entirely.
-
-### Update Plugin Defaults
-
-Open the [`src/settings.ts`](./src/settings.ts) file and change the default values:
-
-- `PLATFORM_NAME` - Set this to be the name of your platform. This is the name of the platform that users will use to register the plugin in the Homebridge `config.json`.
-- `PLUGIN_NAME` - Set this to be the same name you set in the [`package.json`](./package.json) file.
-
-Open the [`config.schema.json`](./config.schema.json) file and change the following attribute:
-
-- `pluginAlias` - set this to match the `PLATFORM_NAME` you defined in the previous step.
-
-See the [Homebridge API docs](https://developers.homebridge.io/#/config-schema#default-values) for more details on the other attributes you can set in the `config.schema.json` file.
-
 ### Build Plugin
-
-TypeScript needs to be compiled into JavaScript before it can run. The following command will compile the contents of your [`src`](./src) directory and put the resulting code into the `dist` folder.
 
 ```shell
 npm run build
@@ -86,130 +154,32 @@ npm run build
 
 ### Link To Homebridge
 
-Run this command so your global installation of Homebridge can discover the plugin in your development environment:
-
 ```shell
 npm link
 ```
 
-You can now start Homebridge, use the `-D` flag, so you can see debug log messages in your plugin:
-
-```shell
-homebridge -D
-```
-
 ### Watch For Changes and Build Automatically
-
-If you want to have your code compile automatically as you make changes, and restart Homebridge automatically between changes, you first need to add your plugin as a platform in `./test/hbConfig/config.json`:
-```
-{
-...
-    "platforms": [
-        {
-            "name": "Config",
-            "port": 8581,
-            "platform": "config"
-        },
-        {
-            "name": "<PLUGIN_NAME>",
-            //... any other options, as listed in config.schema.json ...
-            "platform": "<PLATFORM_NAME>"
-        }
-    ]
-}
-```
-
-and then you can run:
 
 ```shell
 npm run watch
 ```
 
-This will launch an instance of Homebridge in debug mode which will restart every time you make a change to the source code. It will load the config stored in the default location under `~/.homebridge`. You may need to stop other running instances of Homebridge while using this command to prevent conflicts. You can adjust the Homebridge startup command in the [`nodemon.json`](./nodemon.json) file.
+## Requirements
 
-### Customise Plugin
+- Homebridge v1.8.0+ or v2.0.0+
+- Node.js 18+
+- Raspberry Pi Relay Module running and accessible
+- Valid relay secret for authentication
 
-You can now start customising the plugin template to suit your requirements.
+## Security
 
-- [`src/platform.ts`](./src/platform.ts) - this is where your device setup and discovery should go.
-- [`src/platformAccessory.ts`](./src/platformAccessory.ts) - this is where your accessory control logic should go, you can rename or create multiple instances of this file for each accessory type you need to implement as part of your platform plugin. You can refer to the [developer documentation](https://developers.homebridge.io/) to see what characteristics you need to implement for each service type.
-- [`config.schema.json`](./config.schema.json) - update the config schema to match the config you expect from the user. See the [Plugin Config Schema Documentation](https://developers.homebridge.io/#/config-schema).
+This plugin uses HMAC-SHA256 authentication to securely communicate with your Raspberry Pi relay module. Make sure to:
 
-### Versioning Your Plugin
+- Keep your relay secret secure and never share it
+- Use HTTPS in production environments
+- Restrict network access to your relay module
+- Regularly rotate your relay secret
 
-Given a version number `MAJOR`.`MINOR`.`PATCH`, such as `1.4.3`, increment the:
+## License
 
-1. **MAJOR** version when you make breaking changes to your plugin,
-2. **MINOR** version when you add functionality in a backwards compatible manner, and
-3. **PATCH** version when you make backwards compatible bug fixes.
-
-You can use the `npm version` command to help you with this:
-
-```shell
-# major update / breaking changes
-npm version major
-
-# minor update / new features
-npm version update
-
-# patch / bugfixes
-npm version patch
-```
-
-### Publish Package
-
-When you are ready to publish your plugin to [npm](https://www.npmjs.com/), make sure you have removed the `private` attribute from the [`package.json`](./package.json) file then run:
-
-```shell
-npm publish
-```
-
-If you are publishing a scoped plugin, i.e. `@username/homebridge-xxx` you will need to add `--access=public` to command the first time you publish.
-
-#### Publishing Beta Versions
-
-You can publish *beta* versions of your plugin for other users to test before you release it to everyone.
-
-```shell
-# create a new pre-release version (eg. 2.1.0-beta.1)
-npm version prepatch --preid beta
-
-# publish to @beta
-npm publish --tag beta
-```
-
-Users can then install the  *beta* version by appending `@beta` to the install command, for example:
-
-```shell
-sudo npm install -g homebridge-example-plugin@beta
-```
-
-### Best Practices
-
-Consider creating your plugin with the [Homebridge Verified](https://github.com/homebridge/verified) criteria in mind. This will help you to create a plugin that is easy to use and works well with Homebridge.
-You can then submit your plugin to the Homebridge Verified list for review.
-The most up-to-date criteria can be found [here](https://github.com/homebridge/verified#requirements).
-For reference, the current criteria are:
-
-- **General**
-  - The plugin must be of type [dynamic platform](https://developers.homebridge.io/#/#dynamic-platform-template).
-  - The plugin must not offer the same nor less functionality than that of any existing **verified** plugin.
-- **Repo**
-  - The plugin must be published to NPM and the source code available on a GitHub repository, with issues enabled.
-  - A GitHub release should be created for every new version of your plugin, with release notes.
-- **Environment**
-  - The plugin must run on all [supported LTS versions of Node.js](https://github.com/homebridge/homebridge/wiki/How-To-Update-Node.js), at the time of writing this is Node v18, v20 and v22.
-  - The plugin must successfully install and not start unless it is configured.
-  - The plugin must not execute post-install scripts that modify the users' system in any way.
-  - The plugin must not require the user to run Homebridge in a TTY or with non-standard startup parameters, even for initial configuration.
-- **Codebase**
-  - The plugin must implement the [Homebridge Plugin Settings GUI](https://developers.homebridge.io/#/config-schema).
-  - The plugin must not contain any analytics or calls that enable you to track the user.
-  - If the plugin needs to write files to disk (cache, keys, etc.), it must store them inside the Homebridge storage directory.
-  - The plugin must not throw unhandled exceptions, the plugin must catch and log its own errors.
-
-### Useful Links
-
-Note these links are here for help but are not supported/verified by the Homebridge team
-
-- [Custom Characteristics](https://github.com/homebridge/homebridge-plugin-template/issues/20)
+Apache-2.0

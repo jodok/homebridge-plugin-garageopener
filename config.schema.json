@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "GarageOpener",
   "pluginType": "platform",
   "singular": true,
   "strictValidation": false,
@@ -7,10 +7,42 @@
     "type": "object",
     "properties": {
       "name": {
-        "title": "Name",
+        "title": "Garage Door Name",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "Garage Door",
+        "description": "The name of your garage door as it will appear in HomeKit"
+      },
+      "ipAddress": {
+        "title": "IP Address",
+        "type": "string",
+        "required": true,
+        "default": "192.168.1.251",
+        "description": "The IP address of your Raspberry Pi relay module"
+      },
+      "port": {
+        "title": "Port",
+        "type": "number",
+        "required": true,
+        "default": 8080,
+        "minimum": 1,
+        "maximum": 65535,
+        "description": "The port number of your Raspberry Pi relay module"
+      },
+      "secret": {
+        "title": "Relay Secret",
+        "type": "string",
+        "required": true,
+        "description": "The HMAC-SHA256 secret key for authenticating with the relay module API. This should match the RELAY_SECRET in your .env file on the Raspberry Pi."
+      },
+      "gpioPin": {
+        "title": "GPIO Pin",
+        "type": "number",
+        "required": false,
+        "default": 23,
+        "minimum": 1,
+        "maximum": 40,
+        "description": "The GPIO pin number connected to the relay module (default: 23)"
       }
     }
   }
